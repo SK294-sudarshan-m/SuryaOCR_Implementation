@@ -160,7 +160,7 @@ def run(output_dir: Path, pdfs_dir: Path | None = None, pages_per_pdf: int = 3, 
                     item["error"] = f"{type(exc).__name__}: {str(exc)[:200]}"
                 entry["judged"].append(item)
                 say(f"  {entry['document']} p{unit.page}: " + (item.get("error") or f"LLM QUALITY SCORE {item.get(SCORE)}/10 ({item.get(VERDICT)}) | CER {item[CERK]} WER {item[WERK]} | {item['latency_s']}s, {item['input_tokens']} in / {item['output_tokens']} out tokens"))
-        ok = [j for j in entry["judged"] if "error" not in j]
+        ok = [j for j in entry["judged"] if "error" not in j and j.get(SCORE) is not None]
         if ok:
             entry[AVG_SCORE] = round(statistics.mean(j[SCORE] for j in ok), 2)
             entry[AVG_CER] = round(statistics.mean(j[CERK] for j in ok), 4)
