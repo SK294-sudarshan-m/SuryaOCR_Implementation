@@ -41,7 +41,7 @@ docpipe-surya process input --out output
 docpipe-surya process scan.pdf report.docx --out out\ --dpi 150 --pages 1-5
 docpipe-surya doctor
 docpipe-surya evaluate out\scan.pdf\document.json --reference truth.txt
-docpipe-surya judge outputocr_output	iny_output_surya --pdfs input --pages-per-pdf 3 --report-dir outputjudge_output   # needs ANTHROPIC_API_KEY; sends images to Anthropic
+docpipe-surya judge output\ocr_output\tiny_output_surya --pdfs input --pages-per-pdf 3 --report-dir output\judge_output   # needs ANTHROPIC_API_KEY; sends images to Anthropic
 ```
 `process` options: `--dpi` (default 150), `--force-ocr`, `--pages 1-5,8`, `--max-megapixels 100`, `--deterministic`
 (no timings, greedy decoding, llama-server seed 0), `--device auto|cpu|cuda`, `--model-dir`. Folders are searched recursively
