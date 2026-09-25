@@ -54,7 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
         p.add_argument("--model-dir", type=Path, help="folder with surya-2.gguf and surya-2-mmproj.gguf (default: ./models/surya-gguf or $DOCPIPE_MODEL_DIR)")
 
-    proc = sub.add_parser("process", help="convert documents to document.json + document.md")
+    proc = sub.add_parser("process", help="convert documents to document.json")
     proc.add_argument("inputs", nargs="+", type=Path, metavar="path", help="files or folders")
     proc.add_argument("--out", required=True, type=Path, help="output folder; one subfolder per input document")
     proc.add_argument("--dpi", type=_dpi, default=150, help="render resolution for PDF pages sent to OCR, 50-600 (default 150; cost grows steeply with dpi)")

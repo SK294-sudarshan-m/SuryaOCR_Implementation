@@ -1,5 +1,5 @@
 # docpipe-surya
-Documents in, `document.json` + `document.md` out. Native parsing for text; Surya v2 (llama.cpp, CPU) only for pixels.
+Documents in, `document.json` out (no .md output files; .md is for docs only). Native parsing for text; Surya v2 (llama.cpp, CPU) only for pixels.
 Everything lives in this folder: put files in `input\`, results go to `output\` (contents git-ignored).
 
 ## Commands

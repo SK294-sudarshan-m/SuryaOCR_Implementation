@@ -1,7 +1,7 @@
 # docpipe-surya
 
 Local command-line tool and Python library that turns documents into structured text: for every input it writes one
-`document.json` and one reading-ordered `document.md`. Anything that already contains machine-readable text is **parsed
+`document.json` (units in reading order; no Markdown files are written). Anything that already contains machine-readable text is **parsed
 natively**; only pixels (scans, photos, image-only PDF pages, pictures inside Office files) go through **Surya v2 OCR**.
 
 **OCR by Surya (Datalab), modified OpenRAIL-M weights.**
