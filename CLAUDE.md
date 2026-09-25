@@ -1,6 +1,6 @@
 # docpipe-surya
 Documents in, `document.json` + `document.md` out. Native parsing for text; Surya v2 (llama.cpp, CPU) only for pixels.
-Sibling reference (read-only): `C:\Users\User\Desktop\IndicDocPipeline`.
+Everything lives in this folder: put files in `input\`, results go to `output\` (contents git-ignored).
 
 ## Commands
 - `.venv\Scripts\docpipe-surya process <paths> --out <dir> [--dpi 150] [--force-ocr] [--pages 1-5]`

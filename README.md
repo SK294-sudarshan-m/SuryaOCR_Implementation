@@ -35,8 +35,9 @@ Native formats need only PyMuPDF, python-docx, openpyxl, lxml and Pillow; withou
 The folder is found via `--model-dir`, then `%DOCPIPE_MODEL_DIR%`, then `.\models\surya-gguf`. Then run `docpipe-surya doctor`.
 
 ## Use
+Put documents in `input\`; results go to `output\` (their contents are git-ignored, the folders are kept).
 ```powershell
-docpipe-surya process input\ --out out\
+docpipe-surya process input --out output
 docpipe-surya process scan.pdf report.docx --out out\ --dpi 150 --pages 1-5
 docpipe-surya doctor
 docpipe-surya evaluate out\scan.pdf\document.json --reference truth.txt

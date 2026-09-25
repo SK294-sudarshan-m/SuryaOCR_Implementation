@@ -3,3 +3,7 @@ models/
 tools/
 __pycache__/
 *.egg-info/
+input/*
+output/*
+!input/.gitkeep
+!output/.gitkeep
