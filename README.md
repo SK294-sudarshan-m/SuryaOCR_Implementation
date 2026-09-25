@@ -53,7 +53,7 @@ PDF (per page: text layer if it passes the validity check, else OCR), PNG/JPEG/T
 (local images only), and DOC/XLS/PPT only when `soffice` is on PATH. No CSV, HTML, JSON, TXT, XML, ZIP, email or video.
 
 ## Output
-`<out>\<file name with extension>\document.json` and `document.md` (units separated by `<!-- unit N | kind | ... | origin -->`).
+`<out>\<file name with extension>\document.json` only. Each unit also carries its text as Markdown in the `markdown` field.
 Per unit: `index, kind, origin, reason, status, text, markdown, warnings`, plus `page`, `name`, PDF `text_layer` metrics, and for
 OCR units `render_dpi, width_px, height_px, blocks[]` (`order, label, type, bbox_xyxy, conf, text`, plus `html`, `polygon`,
 and `error`/`skipped` flags). Failed or unread blocks keep `text: ""` and produce a warning. Surya reports one page-level
