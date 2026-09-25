@@ -76,6 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
     jd.add_argument("--pdfs", type=Path, help="folder with the source PDFs, if their recorded paths no longer exist")
     jd.add_argument("--pages-per-pdf", type=int, default=3, help="OCR pages sampled per PDF, evenly spread (default 3)")
     jd.add_argument("--model", default="claude-sonnet-5")
+    jd.add_argument("--report-dir", type=Path, help="write judge_report_<output folder name>.json here (e.g. output\judge_output) instead of into the output folder")
     return parser
 
 
@@ -104,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "judge":
         from . import judge
 
-        judge.run(args.output_dir, args.pdfs, args.pages_per_pdf, args.model, say=lambda m: print(m, flush=True))
+        judge.run(args.output_dir, args.pdfs, args.pages_per_pdf, args.model, say=lambda m: print(m, flush=True), report_dir=args.report_dir)
         return 0
     if args.command == "evaluate":
         import json
