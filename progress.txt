@@ -1,0 +1,22 @@
+DOCPIPE-SURYA PROGRESS (2026-09-25). After a context reset read this, tests.json, `git log`.
+
+STATE: implemented; ONE real run done (samples\scansmpl.pdf -> C:\Users\User\Desktop\IndicOCR_Results\surya_test).
+User rule: no test suite, no other runs. Small patches made AFTER that run and only import-checked: Windows-safe server stop
+(taskkill) in model.py, RSS now includes child processes in pipeline._peak_rss_mb.
+
+KNOWN UNKNOWNS
+1. llama.cpp CPU works on Windows 11 (b11179 win-cpu-x64 zip, downloaded with the user OK into tools\llama.cpp). Surya does NOT
+   fetch llama-server. Weights: datalab-to/surya-ocr-2-gguf (surya-2.gguf 1208 MB + mmproj 195 MB), NOT gated; local paths via
+   SURYA_GGUF_LOCAL_MODEL_PATH / SURYA_GGUF_LOCAL_MMPROJ_PATH.
+2. RecognitionPredictor takes PIL images (full_page=True); pages still pass through the temp workspace as PNG files.
+3. One page only: 231 s (incl. 16 s backend start) at 150 dpi, 1273x1632, 17 blocks. Python peak 342 MB; llama-server about 2 GB
+   (probes: 1.7-2.0 GB on short pages). Probes on a short generated EN page: 96 dpi 21 s, 150 dpi 60 s, 200 dpi 163 s (same text).
+   Generated Hindi page at 96 dpi: 44.6 s (text/CER not recorded).
+4. llama-server is started with --host 127.0.0.1 (SURYA_INFERENCE_HOST default), free port. Offline once weights are local
+   (HF_HUB_OFFLINE forced).
+5. Mapping: blocks sorted by reading_order, renumbered gap-free; label=label, type=raw_label; bbox from polygon clipped to image;
+   text=html_to_text(html), empty for skipped/error; html and polygon kept as extras; error/skipped flags added. conf = page mean.
+DECISIONS: default dpi 150 (cost grows with dpi). SURYA_INFERENCE_PARALLEL=1. quality.py thresholds copied unchanged (its supported
+script set is Indic+Latin+Arabic; Surya covers more, so CJK text layers would be judged foreign and sent to OCR).
+GAPS: nothing else run; Indic quality unverified; judge not run (ANTHROPIC_API_KEY not visible to this process); GPU path untested;
+seconds/heartbeat of the first page include the backend start.

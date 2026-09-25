@@ -1,0 +1,12 @@
+{"note": "Verified manually by the user; no test suite exists by decision.",
+ "criteria": [
+  {"id": 1, "text": "doctor reports versions, backend, device, weights, licence; non-zero exit with one fix per problem", "status": "not_verified", "command": "docpipe-surya doctor --model-dir C:\\nonexistent"},
+  {"id": 2, "text": "born-digital PDF takes native path; torch/surya not imported", "status": "not_verified", "command": "python -X importtime -m docpipe_surya process born.pdf --out o 2>&1 | findstr /i \"torch surya\""},
+  {"id": 3, "text": "image-only PDF: OCR path, gap-free order, boxes inside image, unread blocks text empty", "status": "not_verified (one scanned PDF seen by eye)", "command": "docpipe-surya process scan.pdf --out o"},
+  {"id": 4, "text": "DOCX native text+tables plus OCR of embedded image, in order", "status": "not_verified", "command": "docpipe-surya process mixed.docx --out o"},
+  {"id": 5, "text": "XLSX one unit per sheet, cached values", "status": "not_verified", "command": "docpipe-surya process book.xlsx --out o"},
+  {"id": 6, "text": "damaged text-layer PDF routed to OCR with reason", "status": "not_verified", "command": "docpipe-surya process damaged.pdf --out o"},
+  {"id": 7, "text": "corrupt/empty/encrypted/oversized input gives error record, batch continues", "status": "not_verified", "command": "docpipe-surya process corrupt.pdf empty.pdf good.pdf --out o"},
+  {"id": 8, "text": "Hindi output and file names: no UnicodeEncodeError", "status": "not_verified", "command": "set PYTHONIOENCODING=cp1252 && docpipe-surya process hindi_name.pdf --out o"},
+  {"id": 9, "text": "temp files removed after every run incl. failures", "status": "not_verified", "command": "compare the contents of %TEMP% before and after a run"}
+ ]}

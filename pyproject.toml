@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docpipe-surya"
+version = "0.1.0"
+description = "Local ingestion router: reads machine-readable documents natively and sends only pixels to Surya OCR."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "PyMuPDF",       # PDF text layers, page rendering
+    "python-docx",   # DOCX
+    "openpyxl",      # XLSX
+    "lxml",          # PPTX/DOCX XML
+    "Pillow",        # image normalisation
+]
+
+[project.optional-dependencies]
+# Only needed for the OCR path. Native-only runs never import any of these.
+ocr = ["surya-ocr==0.22.1", "psutil"]
+judge = ["anthropic"]  # `docpipe-surya judge` only
+
+[project.scripts]
+docpipe-surya = "docpipe_surya.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
