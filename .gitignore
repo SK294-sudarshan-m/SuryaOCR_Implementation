@@ -4,6 +4,7 @@ tools/
 __pycache__/
 *.egg-info/
 input/*
-output/*
 !input/.gitkeep
+output/*/*
 !output/.gitkeep
+!output/*/.gitkeep
