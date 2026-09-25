@@ -18,6 +18,20 @@ from .metrics import cer, wer
 from .schema import DocumentResult
 
 DEFAULT_MODEL = "claude-sonnet-5"
+SCORE = "llm_quality_score_out_of_10"
+VERDICT = "llm_verdict"
+CERK = "cer_vs_llm_transcription"
+WERK = "wer_vs_llm_transcription"
+AVG_SCORE = "average_llm_quality_score_out_of_10"
+AVG_CER = "average_cer_vs_llm_transcription"
+AVG_WER = "average_wer_vs_llm_transcription"
+SCORE_GUIDE = {
+    SCORE: "Claude's own 1-10 rating of how faithful the OCR text is to the page image (10 = perfect, 1 = unusable). An LLM opinion, not ground truth.",
+    VERDICT: "Claude's one-word summary of that rating: good, acceptable or poor.",
+    CERK: "Character error rate of the OCR text measured against CLAUDE's transcription of the page (0 = identical, lower is better). Not a human reference.",
+    WERK: "Word error rate against Claude's transcription (0 = identical, lower is better).",
+    "average_*": "Averages over the judged pages of one PDF; the overall block averages the per-PDF averages, so every PDF counts equally.",
+}
 MAX_IMAGE_SIDE = 1568  # larger images are downscaled by the API anyway
 
 PROMPT = """You are grading an OCR system. The image is one scanned document page. Below is the text the OCR system extracted from it.
@@ -91,8 +105,10 @@ def judge_page(client, model: str, png: bytes, ocr_text: str) -> dict:
     verdict = _parse("".join(b.text for b in message.content if b.type == "text"))
     transcription = verdict.get("transcription", "")
     verdict.update(usage)
-    verdict["cer_vs_transcription"] = round(cer(transcription, ocr_text), 4)
-    verdict["wer_vs_transcription"] = round(wer(transcription, ocr_text), 4)
+    verdict[SCORE] = verdict.pop("score", None)  # the model's reply key is "score"; stored under a self-explanatory name
+    verdict[VERDICT] = verdict.pop("verdict", None)
+    verdict[CERK] = round(cer(transcription, ocr_text), 4)
+    verdict[WERK] = round(wer(transcription, ocr_text), 4)
     return verdict
 
 
@@ -126,7 +142,7 @@ def run(output_dir: Path, pdfs_dir: Path | None = None, pages_per_pdf: int = 3, 
     calls = sum(len(c) for _, _, c, _ in plan)
     say(f"judge: {model}; {calls} page(s) from {len(plan)} PDF(s) will be sent to the Anthropic API")
 
-    report = {"model": model, "pages_per_pdf": pages_per_pdf, "documents": []}
+    report = {"model": model, "pages_per_pdf": pages_per_pdf, "how_to_read_the_scores": SCORE_GUIDE, "documents": []}
     for path, document, chosen, n_ocr in plan:
         entry = {"document": path.parent.name, "source": document.source, "ocr_pages": n_ocr, "judged": []}
         pdf = _find_pdf(document, pdfs_dir)
@@ -143,24 +159,26 @@ def run(output_dir: Path, pdfs_dir: Path | None = None, pages_per_pdf: int = 3, 
                 except Exception as exc:  # one failed page must not stop the run
                     item["error"] = f"{type(exc).__name__}: {str(exc)[:200]}"
                 entry["judged"].append(item)
-                say(f"  {entry['document']} p{unit.page}: " + (item.get("error") or f"score {item.get('score')} {item.get('verdict')} CER {item['cer_vs_transcription']} WER {item['wer_vs_transcription']} | {item['latency_s']}s, {item['input_tokens']} in / {item['output_tokens']} out tokens"))
+                say(f"  {entry['document']} p{unit.page}: " + (item.get("error") or f"LLM QUALITY SCORE {item.get(SCORE)}/10 ({item.get(VERDICT)}) | CER {item[CERK]} WER {item[WERK]} | {item['latency_s']}s, {item['input_tokens']} in / {item['output_tokens']} out tokens"))
         ok = [j for j in entry["judged"] if "error" not in j]
         if ok:
-            entry["mean_score"] = round(statistics.mean(j["score"] for j in ok), 2)
-            entry["mean_cer"] = round(statistics.mean(j["cer_vs_transcription"] for j in ok), 4)
-            entry["mean_wer"] = round(statistics.mean(j["wer_vs_transcription"] for j in ok), 4)
+            entry[AVG_SCORE] = round(statistics.mean(j[SCORE] for j in ok), 2)
+            entry[AVG_CER] = round(statistics.mean(j[CERK] for j in ok), 4)
+            entry[AVG_WER] = round(statistics.mean(j[WERK] for j in ok), 4)
             entry["total_input_tokens"] = sum(j["input_tokens"] for j in ok)
             entry["total_output_tokens"] = sum(j["output_tokens"] for j in ok)
             entry["mean_latency_s"] = round(statistics.mean(j["latency_s"] for j in ok), 2)
+        if AVG_SCORE in entry:
+            say(f"  ==> {entry['document']}: AVERAGE LLM QUALITY SCORE {entry[AVG_SCORE]}/10 over {len(ok)} page(s) | avg CER {entry[AVG_CER]} | avg WER {entry[AVG_WER]}")
         report["documents"].append(entry)
 
-    scored = [d for d in report["documents"] if "mean_score" in d]
+    scored = [d for d in report["documents"] if AVG_SCORE in d]
     report["overall"] = {
         "pdfs_judged": len(scored),
         "pages_judged": sum(len([j for j in d["judged"] if "error" not in j]) for d in scored),
-        "mean_score": round(statistics.mean(d["mean_score"] for d in scored), 2) if scored else None,
-        "mean_cer": round(statistics.mean(d["mean_cer"] for d in scored), 4) if scored else None,
-        "mean_wer": round(statistics.mean(d["mean_wer"] for d in scored), 4) if scored else None,
+        AVG_SCORE: round(statistics.mean(d[AVG_SCORE] for d in scored), 2) if scored else None,
+        AVG_CER: round(statistics.mean(d[AVG_CER] for d in scored), 4) if scored else None,
+        AVG_WER: round(statistics.mean(d[AVG_WER] for d in scored), 4) if scored else None,
         "total_input_tokens": sum(d["total_input_tokens"] for d in scored),
         "total_output_tokens": sum(d["total_output_tokens"] for d in scored),
         "total_latency_s": round(sum(j["latency_s"] for d in scored for j in d["judged"] if "error" not in j), 2),
@@ -171,7 +189,9 @@ def run(output_dir: Path, pdfs_dir: Path | None = None, pages_per_pdf: int = 3, 
         report_dir.mkdir(parents=True, exist_ok=True)
         target = report_dir / f"judge_report_{output_dir.resolve().name}.json"
     target.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-    say(f"overall: {report['overall']}  -> {target}")
+    o = report["overall"]
+    say(f"==== OVERALL: average LLM quality score {o[AVG_SCORE]}/10 over {o['pages_judged']} page(s) of {o['pdfs_judged']} PDF(s) | avg CER {o[AVG_CER]} | avg WER {o[AVG_WER]} | {o['total_input_tokens']} in / {o['total_output_tokens']} out tokens")
+    say(f"report: {target}")
     return report
 
 
