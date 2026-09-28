@@ -1,4 +1,4 @@
-# docpipe-surya
+# SuryaOCR Implementation
 
 Local command-line tool and Python library that turns documents into structured JSON. Anything that already
 contains machine-readable text is **parsed natively**; only pixels — scans, photos, image-only PDF pages, pictures
